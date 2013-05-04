@@ -1,16 +1,46 @@
 
 
 import pymssql
-from dbconnect.py import CONNECTION_DICT
+import sys
+import dbconfig
+# sys.path.append("/home/coleman/Code/")
 
 
-class Connection(object):
+
+
+class AlchemyConnection(object):
     """
-    Connection class to database. Don't forget to close your connection.
+    Connection to database.
     """
+    def __init__(self):
+
+        self.createConnection()
+
     def createConnection(self):
 
-        self.con = pymssql.connect(CONNECTION_DICT)
+        try:
+            self.con = pymssql.connect(dbconfig.host, dbconfig.user, dbconfig.password, dbconfig.database, as_dict=True)
+            print '[AlchemyConnection] Connection successful for user %s to database %s' % (dbconfig.user,
+                                                                                            dbconfig.database)
+        except pymssql.DatabaseError as e:
+            pass
+
+    def close(self):
+
+        self.con.close()
+
+    def getCursor(self):
+        ## TODO this feels shitty
+        self.cursor = self.con.cursor()
+        return self.cursor  # returns pymmssql cursor object
+
+    def commit(self):
+
+        self.con.commit()
 
 
-#    sqlserver://sqlclust1.smartbrief.com/alchemy;SendStringParametersAsUnicode=false
+
+
+
+
+

@@ -1,3 +1,4 @@
-
+.idea
+dbconfig.py
 *.pyc
 .git
