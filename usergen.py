@@ -23,6 +23,7 @@ class FeedbackSubscriber(object):
         self.zipcode = kwargs.get('zipcode', "20004")
         self.mail_format_id = 1
         self.marketing_message = 'true'
+        # self.position_level = kwargs.get('positionLevel')
         # etc
 
     # def saveSubscriber(self):

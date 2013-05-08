@@ -5,6 +5,7 @@ import string
 import random
 import usergen
 import sst.actions
+import datetime
 
 
 # pymssql connection examples here: https://code.google.com/p/pymssql/wiki/PymssqlExamples
@@ -16,7 +17,7 @@ BRIEF_IDS = {'AAAA': '7325D171-85C1-4A99-9773-4FE6659490B5'}
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
-# NOTE this will only work with new-style signup pages
+
 def createAAAASubscriberViaWeb(**kwargs):
     sst.actions.start()
     sst.actions.go_to('https://www2.qa.smartbrief.com/aaaa')
@@ -29,8 +30,42 @@ def createAAAASubscriberViaWeb(**kwargs):
     submit_button_page1 = sst.actions.get_element_by_css('#SignupDiv')
     sst.actions.click_element(submit_button_page1)
     # complete page 2: first get the elements
-    sst.actions.sleep(10)
+    sst.actions.sleep(3)
     sst.actions.stop()
+
+def createCIASubscriberViaWeb(**kwargs):
+    sst.actions.start()
+    sst.action.go_to('https://www2.qa.smartbrief.com/')
+    # Get elements on page
+    first_email_box = sst.actions.get_element_by_xpath('//input[@name="email"]')
+    confirm_email_box = sst.actions.get_element_by_xpath('//input[@name="confirmEmail"]')
+    first_name = sst.actions.get_element_by_xpath('//input[@name="firstName"]')
+    last_name = sst.actions.get_element_by_xpath('//input[@name="lastName"]')
+    company = sst.actions.get_element_by_xpath('//input[@name="company"]')
+    title = sst.actions.get_element_by_xpath('//input[@name="title"]')
+    zipcode = sst.actions.get_element_by_xpath('//input[@name="zipcode"]')
+    country = sst.actions.get_element_by_xpath('//select[@name="country"]')
+    position_level = sst.actions.get_element_by_xpath('//select[@name="positionLevel"]')
+    company_size = sst.actions.get_element_by_xpath('//select[@name="companySize"]')
+    # Complete form
+    sst.actions.write_textfield(first_email_box, kwargs['email'])
+    sst.actions.write_textfield(confirm_email_box, kwargs['email'])
+    sst.actions.write_textfield(first_name, kwargs['first_name'])
+    sst.actions.write_textfield(last_name, kwargs['last_name'])
+    sst.actions.write_textfield(company, kwargs['company'])
+    sst.actions.write_textfield(title, kwargs['title'])
+    sst.actions.write_textfield(zipcode, kwargs['zipcode'])
+    sst.actions.set_dropdown_value(country, "United States")
+    sst.actions.set_dropdown_value(position_level, "Staff")
+    sst.actions.set_dropdown_value(company_size, "Less than $1 million")
+    # Get signup button and click submit
+    submit_button = sst.actions.get_element_by_css('#SignupDiv')
+    sst.actions.click_element(submit_button)
+    sst.actions.sleep(3)
+    sst.actions.stop()
+
+
+
 
 def createWorkforceSubscriberViaWeb(**kwargs):
     sst.actions.start()
@@ -76,6 +111,7 @@ def createWorkforceSubscriberViaWeb(**kwargs):
         # Click submit button
     sst.actions.click_element(submit_button_page2)
     sst.actions.stop()
+
 
 class AlchemyConnectionTest(unittest.TestCase):
 
@@ -140,13 +176,11 @@ class SubscriberTest(unittest.TestCase):
     #     }
 
 
-
-
 def main():
     logging.basicConfig(filename='feedback_test.log', level=logging.INFO)
-    logging.info('Starting feedback test.')
+    logging.info('========STARTING TEST========' )
     unittest.main()
-    logging.info('Finished')
+    logging.info('========FINISHED=============')
 
 
 if __name__ == '__main__':
