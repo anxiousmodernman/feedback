@@ -33,9 +33,10 @@ def createAAAASubscriberViaWeb(**kwargs):
     sst.actions.sleep(3)
     sst.actions.stop()
 
+
 def createCIASubscriberViaWeb(**kwargs):
     sst.actions.start()
-    sst.action.go_to('https://www2.qa.smartbrief.com/')
+    sst.actions.go_to('https://www2.qa.smartbrief.com/cia')
     # Get elements on page
     first_email_box = sst.actions.get_element_by_xpath('//input[@name="email"]')
     confirm_email_box = sst.actions.get_element_by_xpath('//input[@name="confirmEmail"]')
@@ -63,8 +64,6 @@ def createCIASubscriberViaWeb(**kwargs):
     sst.actions.click_element(submit_button)
     sst.actions.sleep(3)
     sst.actions.stop()
-
-
 
 
 def createWorkforceSubscriberViaWeb(**kwargs):
@@ -137,14 +136,12 @@ class SubscriberTest(unittest.TestCase):
         in the Python dictionary named data. In this case the value should be
         'Save'. This test will fail of the subscriber is modified after the fact.
         """
-
         data = {
             'email': 'save_subscriber_' + id_generator() + '@smartbrief.com',
             'first_name': 'Save',
             'last_name': 'Subscriber',
             'title': 'Selenium Tester',
         }
-
         subscriber = usergen.FeedbackSubscriber(**data)
         subscriber = subscriber.__dict__
         createAAAASubscriberViaWeb(**subscriber)
@@ -161,26 +158,49 @@ class SubscriberTest(unittest.TestCase):
         test_conn.close()
         self.assertListEqual(results, [subscriber['email']], "Test failure. Is there one row for email = " + subscriber['email'])
 
-    # def testMergeSubscriber(self):
-    #     """
-    #     feedback-merge-livelookup@smartbrief.com into feedback-profiletest@smartbrief.com
-    #     """
-    #     feedback_merge_livelookup = {
-    #         'subscriberid': 'DD0911EB-660A-4DBA-9475-1EC4B0306A24',
-    #         'email': 'feedback-merge-livelookup@smartbrief.com',
-    #     }
-    #
-    #     feedback_profiletest = {
-    #         'subscriberid': '',
-    #
-    #     }
+    def testMergeSubscriber(self):
+        """
+        feedback-merge-livelookup@smartbrief.com into feedback-profiletest@smartbrief.com
+        """
+        logging.info("BEGINNING MERGE TEST")
+
+        change_this_subscriber = {
+            'email': 'change_this_subscriber_' + id_generator() + '@smartbrief.com',
+            'first_name': 'ChangeThis',
+            'last_name': 'Subscriber',
+            'title': 'Changer',
+            'city': 'Mexico City',
+            'country': 'Mexico'
+            }
+        change_this_subscriber = usergen.FeedbackSubscriber(**change_this_subscriber)
+        change_this_subscriber = change_this_subscriber.__dict__
+        createAAAASubscriberViaWeb(**change_this_subscriber)
+        logging.info("""[new subscriber] email = {email}
+                     """.format(email=change_this_subscriber['email']))
+
+        merge_into_subscriber = {
+            'email': 'merge_into_subscriber_' + id_generator() + '@smartbrief.com',
+            'first_name': 'ChangeThis',
+            'last_name': 'Subscriber',
+            'title': 'Changer',
+            'city': 'Mexico City',
+            'country': 'Mexico'
+        }
+        merge_into_subscriber = usergen.FeedbackSubscriber(**merge_into_subscriber)
+        merge_into_subscriber = merge_into_subscriber.__dict__
+        createCIASubscriberViaWeb(**merge_into_subscriber)
+        logging.info("""[new subscriber] email = {email}
+                     """.format(email=merge_into_subscriber['email']))
+
+    def testFinal(self):
+        logging.info('========FINISHED=============')
 
 
 def main():
     logging.basicConfig(filename='feedback_test.log', level=logging.INFO)
-    logging.info('========STARTING TEST========' )
+    logging.info('========STARTING TEST========')
     unittest.main()
-    logging.info('========FINISHED=============')
+
 
 
 if __name__ == '__main__':
