@@ -30,7 +30,6 @@ class AlchemyConnection(object):
         self.con.close()
 
     def getCursor(self):
-        ## TODO this feels shitty
         self.cursor = self.con.cursor()
         return self.cursor  # returns pymmssql cursor object
 

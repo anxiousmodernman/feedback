@@ -31,9 +31,13 @@ def addSubscription(briefid, **kwargs):
              insert into subscriber_brief_profile (subscriberid, briefid)
              values ('{subscriberid}', '{briefid}')
           """.format(briefid=briefid, subscriberid=kwargs['subscriberid'])
+    print 'Running this INSERT statement in addSubscription()'
+    print sql  # print query to the terminal
     cur.execute(sql)
     cur.close()
+    test_conn.commit()  # NOTE: You MUST call commit() on your connection object to actually write to the database
     test_conn.close()
+    print 'Done adding subscription'
     logging.info("""[added subscription] {email} subscribed to {briefid}
                  """.format(email=kwargs['email'], briefid=briefid))
 
@@ -114,9 +118,13 @@ def mergeRoutine(change_me, merge_into_me):
     sst.actions.click_element(edit_button)
     email_field = sst.actions.get_element_by_css('#emaileditshortprofile')
     sst.actions.write_textfield(email_field, merge_into_me['email'])
+
+    # import pdb
+    # pdb.set_trace()
+
     sst.actions.click_element(edit_button)  # edit button doesn't change
-    sst.actions.accept_alert()
-    sst.actions.accept_alert()
+    #sst.actions.accept_alert()
+    #sst.actions.accept_alert()
     sst.actions.sleep(1)
     sst.actions.stop()
 
@@ -187,7 +195,7 @@ class SubscriberTest(unittest.TestCase):
         logging.info("BEGINNING MERGE TEST")
 
         change_this_subscriber = {
-            'email': 'change.this.subscriber.' + id_generator() + '@smartbrief.com',
+            'email': 'changesubscriber' + id_generator() + '@smartbrief.com',
             'first_name': 'ChangeThis',
             'last_name': 'Subscriber',
             'title': 'Giver',
@@ -205,7 +213,7 @@ class SubscriberTest(unittest.TestCase):
                      """.format(email=change_this_subscriber['email']))
 
         merge_into_subscriber = {
-            'email': 'merge.into.subscriber.' + id_generator() + '@smartbrief.com',
+            'email': 'mergesubscriber' + id_generator() + '@smartbrief.com',
             'first_name': 'MergeIntoThis',
             'last_name': 'Subscriber',
             'title': 'Receiver',
@@ -217,7 +225,6 @@ class SubscriberTest(unittest.TestCase):
         merge_into_subscriber = merge_into_subscriber.__dict__
         createCIASubscriberViaWeb(**merge_into_subscriber)
         merge_into_subscriber['subscriberid'] = getSubscriberId(**merge_into_subscriber)  # set subscriberid
-        merge_into_subscriber
         logging.info("""[new subscriber] email = {email}\
                      """.format(email=merge_into_subscriber['email']))
         addSubscription(BRIEF_IDS['CIA10/8/2007'], **change_this_subscriber)
@@ -227,9 +234,11 @@ class SubscriberTest(unittest.TestCase):
         # Database checks
         test_conn = AlchemyConnection()
         cur = test_conn.getCursor()
+        import pdb
+        pdb.set_trace()  # TODO remove this
         sql = """select * from link_subscriber_brief lsb
-                 where lsb.subscriberid = '{email}' % subscriber['email']
-              """.format(email=change_this_subscriber['email'])
+                 where lsb.subscriberid = '{subscriberid}'
+              """.format(subscriberid=change_this_subscriber['subscriberid'])
         cur.execute(sql)
         results = []  # will be list of
         for row in cur:
