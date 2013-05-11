@@ -6,6 +6,7 @@ import random
 import usergen
 import sst.actions
 import datetime
+from selenium import webdriver
 
 
 # pymssql connection examples here: https://code.google.com/p/pymssql/wiki/PymssqlExamples
@@ -98,7 +99,7 @@ def getSubscriberId(**kwargs):
     cur = test_conn.getCursor()
     sql = 'SELECT subscriberid from subscriber where email = \'%s\'' % kwargs['email']
     cur.execute(sql)
-    results = []  # will be list of
+    results = []
     for row in cur:
         results.append(str(row['subscriberid']).upper())
     cur.close()
@@ -114,21 +115,27 @@ def id_generator(size=6, chars=string.ascii_lowercase + string.digits):
 
 
 def mergeRoutine(change_me, merge_into_me):
+
+    # TODO refactor with webdriver???
+    # browser = webdriver.Firefox()
+    # browser.get('http://shark.smartbrief.com' + TOOLS_DIR + '/?email=' + change_me['email'])
+    # edit_button = browser.find_element_by_id('#editaccountshortprofile')
+
     sst.actions.start()
     sst.actions.go_to('http://shark.smartbrief.com' + TOOLS_DIR + '/?email=' + change_me['email'])  # look up change_me
+    import pdb
+    pdb.set_trace()
     sst.actions.sleep(3)
     edit_button = sst.actions.get_element_by_css('#editaccountshortprofile')
     sst.actions.click_element(edit_button)
+    sst.actions.sleep(3)
     email_field = sst.actions.get_element_by_css('#emaileditshortprofile')
     sst.actions.write_textfield(email_field, merge_into_me['email'])
-
-    # import pdb
-    # pdb.set_trace()
-
-    sst.actions.click_element(edit_button)  # edit button doesn't change
-    #sst.actions.accept_alert()
-    #sst.actions.accept_alert()
-    sst.actions.sleep(1)
+    edit_button = sst.actions.get_element_by_css('#editaccountshortprofile')
+    sst.actions.simulate_keys(edit_button, "RETURN")  # edit button doesn't change
+    sst.actions.accept_alert()
+    sst.actions.accept_alert()
+    sst.actions.sleep(3)
     sst.actions.stop()
 
 
@@ -138,7 +145,7 @@ class AlchemyConnectionTest(unittest.TestCase):
         test_conn = AlchemyConnection()
         cur = test_conn.getCursor()
         cur.execute('SELECT brief_name, full_brief_name from brief where briefid = %s', BRIEF_IDS['AAAA'])
-        results = []  # will be list of
+        results = []
         for row in cur:
             results.append(str(row['brief_name']).upper())
         cur.close()
@@ -151,8 +158,8 @@ class FunctionTests(unittest.TestCase):
     Test various helper functions here to make sure they work
     """
     def testGetSubscriberId(self):
-        test_data = {'subscriberid': 'DD670094-6DD4-4604-8A16-2B2184FB69CB',  # compare our result to this
-                     'email': 'snarayanaswamy@smartbrief.com',                # use this email to test the function
+        test_data = {'subscriberid': '51CC3DE5-F16A-4222-B59E-51F0C574C2EB',  # compare our result to this
+                     'email': 'mergeintouxsi0u@smartbrief.com',               # use this email to test the function
                      }
         result = getSubscriberId(**test_data)
         self.assertTrue(result == test_data['subscriberid'])
@@ -184,12 +191,13 @@ class SubscriberTest(unittest.TestCase):
         cur.execute(sql)
         logging.info("""[new subscriber] email = {email}\
                      """.format(email=subscriber['email']))
-        results = []  # will be list of
+        results = []
         for row in cur:
             results.append(row['email'])
         cur.close()
         test_conn.close()
         self.assertListEqual(results, [subscriber['email']], "Test failure. Is there one row for email = " + subscriber['email'])
+
 
     def testMergeSubscriber(self):
         """
@@ -235,24 +243,41 @@ class SubscriberTest(unittest.TestCase):
         addSubscription(BRIEF_IDS['AAAA1/21/2009'], **merge_into_subscriber)
         # Now that we have our subscriptions, do merge routine
         mergeRoutine(change_this_subscriber, merge_into_subscriber)
-        # Database checks
+        # Database checks for giver subscriber
         test_conn = AlchemyConnection()
         cur = test_conn.getCursor()
-        import pdb
-        pdb.set_trace()  # TODO remove this
         sql = """select lsb.briefid, lsb.status
                  from link_subscriber_brief lsb
                  where lsb.subscriberid = '{subscriberid}'
               """.format(subscriberid=change_this_subscriber['subscriberid'])
         cur.execute(sql)
-        results = []  # will be list of
+        results = []
         for row in cur:
             results.append(row['status']) # builds a list [] of dictionaries {} where each dict is a database row
         results = set(results)
         cur.close()
         test_conn.close()
-        test_set = set(['U', 'U', 'U', 'S', 'S'])
-        self.assertEquals(results, test_set, "Merge test failure for giver email " + change_this_subscriber['email'])
+        test_set_giver = set(['U', 'U', 'U', 'S', 'S'])
+        self.assertEquals(results, test_set_giver, "[Merge test failure] giver email " + change_this_subscriber['email'])
+        ## Database checks for receiver subscriber
+        test_conn = AlchemyConnection()
+        cur = test_conn.getCursor()
+        sql = """select lsb.briefid, lsb.status
+                 from link_subscriber_brief lsb
+                 where lsb.subscriberid = '{subscriberid}'
+              """.format(subscriberid=merge_into_subscriber['subscriberid'])
+        cur.execute(sql)
+        results = []
+        for row in cur:
+            results.append(row['status']) # builds a list [] of dictionaries {} where each dict is a database row
+        results = set(results)
+        cur.close()
+        test_conn.close()
+        test_set_receiver = set(['U', 'U', 'S', 'S', 'S', 'S' 'S'])
+        message = """[Merge test failure] receiver email {email}
+                     did not merge properly
+                     """.format(email=merge_into_subscriber['email'])
+        self.assertEquals(results, test_set_receiver, message)
 
 
         """
