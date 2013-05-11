@@ -21,7 +21,10 @@ BRIEF_IDS = {'AAAA': '7325D171-85C1-4A99-9773-4FE6659490B5',
              'SOCIALMEDIA11/26/2008': '2B97B751-E853-4ED0-A694-E8DA13B809CC',
              'SocialMedia': '9A6B83EA-211A-4D95-9BF3-DEC352898000',
              'AAAA10/3/2006': '8346EB46-80FD-49F2-8738-90A4A4499A6D',
+             'AAAA1/21/2009': '40227BB1-F01D-4E1D-987D-6B5485EF6DC9'
              }
+
+
 
 def addSubscription(briefid, **kwargs):
     test_conn = AlchemyConnection()
@@ -106,7 +109,7 @@ def getSubscriberId(**kwargs):
     return subscriberid
 
 
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+def id_generator(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
 
@@ -213,7 +216,7 @@ class SubscriberTest(unittest.TestCase):
                      """.format(email=change_this_subscriber['email']))
 
         merge_into_subscriber = {
-            'email': 'mergesubscriber' + id_generator() + '@smartbrief.com',
+            'email': 'mergeinto' + id_generator() + '@smartbrief.com',
             'first_name': 'MergeIntoThis',
             'last_name': 'Subscriber',
             'title': 'Receiver',
@@ -229,6 +232,7 @@ class SubscriberTest(unittest.TestCase):
                      """.format(email=merge_into_subscriber['email']))
         addSubscription(BRIEF_IDS['CIA10/8/2007'], **change_this_subscriber)
         addSubscription(BRIEF_IDS['AAAA10/3/2006'], **merge_into_subscriber)
+        addSubscription(BRIEF_IDS['AAAA1/21/2009'], **merge_into_subscriber)
         # Now that we have our subscriptions, do merge routine
         mergeRoutine(change_this_subscriber, merge_into_subscriber)
         # Database checks
@@ -236,22 +240,19 @@ class SubscriberTest(unittest.TestCase):
         cur = test_conn.getCursor()
         import pdb
         pdb.set_trace()  # TODO remove this
-        sql = """select * from link_subscriber_brief lsb
+        sql = """select lsb.briefid, lsb.status
+                 from link_subscriber_brief lsb
                  where lsb.subscriberid = '{subscriberid}'
               """.format(subscriberid=change_this_subscriber['subscriberid'])
         cur.execute(sql)
         results = []  # will be list of
         for row in cur:
-            results.append(row)
+            results.append(row['status']) # builds a list [] of dictionaries {} where each dict is a database row
+        results = set(results)
         cur.close()
         test_conn.close()
-
-        #logging.info("""[new subscriber] email = {email}\
-        #             """.format(email=subscriber['email']))
-
-
-
-
+        test_set = set(['U', 'U', 'U', 'S', 'S'])
+        self.assertEquals(results, test_set, "Merge test failure for giver email " + change_this_subscriber['email'])
 
 
         """
