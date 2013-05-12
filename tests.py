@@ -254,11 +254,10 @@ class SubscriberTest(unittest.TestCase):
         results = []
         for row in cur:
             results.append(row['status']) # builds a list [] of dictionaries {} where each dict is a database row
-        results = set(results)
         cur.close()
         test_conn.close()
-        test_set_giver = set(['U', 'U', 'U', 'S', 'S'])
-        self.assertEquals(results, test_set_giver, "[Merge test failure] giver email " + change_this_subscriber['email'])
+        test_results_list_giver = sorted(['U', 'U', 'U', 'S', 'S'])
+        self.assertEquals(results, sorted(test_results_list_giver), "[Merge test failure] giver email " + change_this_subscriber['email'])
         ## Database checks for receiver subscriber
         test_conn = AlchemyConnection()
         cur = test_conn.getCursor()
@@ -269,15 +268,14 @@ class SubscriberTest(unittest.TestCase):
         cur.execute(sql)
         results = []
         for row in cur:
-            results.append(row['status']) # builds a list [] of dictionaries {} where each dict is a database row
-        results = set(results)
+            results.append(row['status'])  # builds a list [] of dictionaries {} where each dict is a database row
         cur.close()
         test_conn.close()
-        test_set_receiver = set(['U', 'U', 'S', 'S', 'S', 'S' 'S'])
+        test_results_list_receiver = sorted(['U', 'U', 'S', 'S', 'S', 'S' 'S'])
         message = """[Merge test failure] receiver email {email}
                      did not merge properly
                      """.format(email=merge_into_subscriber['email'])
-        self.assertEquals(results, test_set_receiver, message)
+        self.assertEquals(results, sorted(test_results_list_receiver), message)
 
 
         """
