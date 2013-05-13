@@ -26,7 +26,6 @@ BRIEF_IDS = {'AAAA': '7325D171-85C1-4A99-9773-4FE6659490B5',
              }
 
 
-
 def addSubscription(briefid, **kwargs):
     test_conn = AlchemyConnection()
     cur = test_conn.getCursor()
@@ -101,11 +100,10 @@ def getSubscriberId(**kwargs):
     cur.execute(sql)
     results = []
     for row in cur:
-        results.append(str(row['subscriberid']).upper())
+        results.append(str(row.subscriberid).upper())
     cur.close()
     test_conn.close()
     subscriberid = results.pop()
-    subscriberid = str(subscriberid).upper()
     print 'subscriberid returned from getSubscriberId(): %s' % subscriberid
     return subscriberid
 
@@ -115,12 +113,6 @@ def id_generator(size=6, chars=string.ascii_lowercase + string.digits):
 
 
 def mergeRoutine(change_me, merge_into_me):
-
-    # TODO refactor with webdriver???
-    # browser = webdriver.Firefox()
-    # browser.get('http://shark.smartbrief.com' + TOOLS_DIR + '/?email=' + change_me['email'])
-    # edit_button = browser.find_element_by_id('#editaccountshortprofile')
-
     sst.actions.start()
     sst.actions.go_to('http://shark.smartbrief.com' + TOOLS_DIR + '/?email=' + change_me['email'])  # look up change_me
     import pdb
@@ -147,10 +139,10 @@ class AlchemyConnectionTest(unittest.TestCase):
         cur.execute('SELECT brief_name, full_brief_name from brief where briefid = %s', BRIEF_IDS['AAAA'])
         results = []
         for row in cur:
-            results.append(str(row['brief_name']).upper())
+            results.append(row.brief_name.upper())
         cur.close()
         test_conn.close()
-        self.assertListEqual(results, ['AAAA'], "Connection to database failed")  # TODO better asserts case
+        self.assertListEqual(results, ['AAAA'], "Connection to database failed")
 
 
 class FunctionTests(unittest.TestCase):
@@ -193,7 +185,7 @@ class SubscriberTest(unittest.TestCase):
                      """.format(email=subscriber['email']))
         results = []
         for row in cur:
-            results.append(row['email'])
+            results.append(row.email)
         cur.close()
         test_conn.close()
         self.assertListEqual(results, [subscriber['email']], "Test failure. Is there one row for email = " + subscriber['email'])
@@ -253,7 +245,7 @@ class SubscriberTest(unittest.TestCase):
         cur.execute(sql)
         results = []
         for row in cur:
-            results.append(row['status']) # builds a list [] of dictionaries {} where each dict is a database row
+            results.append(row.status)  # builds a list [] of dictionaries {} where each dict is a database row
         cur.close()
         test_conn.close()
         test_results_list_giver = sorted(['U', 'U', 'U', 'S', 'S'])
@@ -268,7 +260,7 @@ class SubscriberTest(unittest.TestCase):
         cur.execute(sql)
         results = []
         for row in cur:
-            results.append(row['status'])  # builds a list [] of dictionaries {} where each dict is a database row
+            results.append(row.status)  # builds a list [] of dictionaries {} where each dict is a database row
         cur.close()
         test_conn.close()
         test_results_list_receiver = sorted(['U', 'U', 'S', 'S', 'S', 'S' 'S'])
@@ -277,9 +269,8 @@ class SubscriberTest(unittest.TestCase):
                      """.format(email=merge_into_subscriber['email'])
         self.assertEquals(results, sorted(test_results_list_receiver), message)
 
-
         """
-        DETAILED MERGE REQUIRMENTS - LIVE LOOKUP PAGE
+        DETAILED MERGE REQUIREMENTS - LIVE LOOKUP PAGE
         ---------------------------------------------
         * *Merge* Verify that subscribers that get merged into another subscriber record are
         ** Unsubscribed from all their trials and briefs

@@ -1,6 +1,6 @@
 
 
-import pymssql
+import pyodbc
 import sys
 import dbconfig
 # sys.path.append("/home/coleman/Code/")
@@ -19,10 +19,10 @@ class AlchemyConnection(object):
     def createConnection(self):
 
         try:
-            self.con = pymssql.connect(dbconfig.host, dbconfig.user, dbconfig.password, dbconfig.database, as_dict=True)
+            self.con = pyodbc.connect('DSN=%s;UID=%s;PWD=%s' % (dbconfig.dsn, dbconfig.user, dbconfig.password))
             print '[AlchemyConnection] Connection successful for user %s to database %s' % (dbconfig.user,
                                                                                             dbconfig.database)
-        except pymssql.DatabaseError as e:
+        except pyodbc.DatabaseError as e:
             pass
 
     def close(self):
@@ -31,7 +31,7 @@ class AlchemyConnection(object):
 
     def getCursor(self):
         self.cursor = self.con.cursor()
-        return self.cursor  # returns pymmssql cursor object
+        return self.cursor  # returns pyodbc cursor object
 
     def commit(self):
 
