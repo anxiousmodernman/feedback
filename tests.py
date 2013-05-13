@@ -263,7 +263,7 @@ class SubscriberTest(unittest.TestCase):
             results.append(row.status)  # builds a list [] of dictionaries {} where each dict is a database row
         cur.close()
         test_conn.close()
-        test_results_list_receiver = sorted(['U', 'U', 'S', 'S', 'S', 'S' 'S'])
+        test_results_list_receiver = sorted(['U','U', 'U', 'S', 'S', 'S', 'S'])
         message = """[Merge test failure] receiver email {email}
                      did not merge properly
                      """.format(email=merge_into_subscriber['email'])
