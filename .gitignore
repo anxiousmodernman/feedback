@@ -3,3 +3,6 @@ dbconfig.py
 *.pyc
 .git
 *.log
+*.swp
+*~
+

@@ -65,30 +65,41 @@ def createCIASubscriberViaWeb(**kwargs):
     sst.actions.start()
     sst.actions.go_to('https://www2.qa.smartbrief.com/cia')
     # Get elements on page
-    first_email_box = sst.actions.get_element_by_xpath('//input[@name="email"]')
-    confirm_email_box = sst.actions.get_element_by_xpath('//input[@name="confirmEmail"]')
-    first_name = sst.actions.get_element_by_xpath('//input[@name="firstName"]')
-    last_name = sst.actions.get_element_by_xpath('//input[@name="lastName"]')
-    company = sst.actions.get_element_by_xpath('//input[@name="company"]')
-    title = sst.actions.get_element_by_xpath('//input[@name="title"]')
-    zipcode = sst.actions.get_element_by_xpath('//input[@name="zipcode"]')
-    country = sst.actions.get_element_by_xpath('//select[@name="country"]')
-    position_level = sst.actions.get_element_by_xpath('//select[@name="positionLevel"]')
-    company_size = sst.actions.get_element_by_xpath('//select[@name="companySize"]')
-    # Complete form
+    # first_email_box = sst.actions.get_element_by_xpath('//input[@name="email"]')
+    # confirm_email_box = sst.actions.get_element_by_xpath('//input[@name="confirmEmail"]')
+    # first_name = sst.actions.get_element_by_xpath('//input[@name="firstName"]')
+    # last_name = sst.actions.get_element_by_xpath('//input[@name="lastName"]')
+    # company = sst.actions.get_element_by_xpath('//input[@name="company"]')
+    # title = sst.actions.get_element_by_xpath('//input[@name="title"]')
+    # zipcode = sst.actions.get_element_by_xpath('//input[@name="zipcode"]')
+    # country = sst.actions.get_element_by_xpath('//select[@name="country"]')
+    # position_level = sst.actions.get_element_by_xpath('//select[@name="positionLevel"]')
+    # company_size = sst.actions.get_element_by_xpath('//select[@name="companySize"]')
+    # # Complete form
+    # sst.actions.write_textfield(first_email_box, kwargs['email'])
+    # sst.actions.write_textfield(confirm_email_box, kwargs['email'])
+    # sst.actions.write_textfield(first_name, kwargs['first_name'])
+    # sst.actions.write_textfield(last_name, kwargs['last_name'])
+    # sst.actions.write_textfield(company, kwargs['company'])
+    # sst.actions.write_textfield(title, kwargs['title'])
+    # sst.actions.write_textfield(zipcode, kwargs['zipcode'])
+    # sst.actions.set_dropdown_value(country, "United States")
+    # sst.actions.set_dropdown_value(position_level, "Staff")
+    # sst.actions.set_dropdown_value(company_size, "Less than $1 million")
+    # # Get signup button and click submit
+    # submit_button = sst.actions.get_element_by_css('#SignupDiv')
+    # sst.actions.click_element(submit_button)
+    # sst.actions.sleep(3)
+    # sst.actions.stop()
+    first_email_box = sst.actions.get_element_by_xpath('//*[@id="signupForm"]/div[5]/div[2]/input')
+    confirm_email_box = sst.actions.get_element_by_xpath('//*[@id="signupForm"]/div[6]/div[2]/input')
+    # use sst.actions function to 'type' into text box
     sst.actions.write_textfield(first_email_box, kwargs['email'])
     sst.actions.write_textfield(confirm_email_box, kwargs['email'])
-    sst.actions.write_textfield(first_name, kwargs['first_name'])
-    sst.actions.write_textfield(last_name, kwargs['last_name'])
-    sst.actions.write_textfield(company, kwargs['company'])
-    sst.actions.write_textfield(title, kwargs['title'])
-    sst.actions.write_textfield(zipcode, kwargs['zipcode'])
-    sst.actions.set_dropdown_value(country, "United States")
-    sst.actions.set_dropdown_value(position_level, "Staff")
-    sst.actions.set_dropdown_value(company_size, "Less than $1 million")
-    # Get signup button and click submit
-    submit_button = sst.actions.get_element_by_css('#SignupDiv')
-    sst.actions.click_element(submit_button)
+    # get signup button element and click submit
+    submit_button_page1 = sst.actions.get_element_by_css('#SignupDiv')
+    sst.actions.click_element(submit_button_page1)
+    # complete page 2: first get the elements
     sst.actions.sleep(3)
     sst.actions.stop()
 
@@ -115,8 +126,6 @@ def id_generator(size=6, chars=string.ascii_lowercase + string.digits):
 def mergeRoutine(change_me, merge_into_me):
     sst.actions.start()
     sst.actions.go_to('http://shark.smartbrief.com' + TOOLS_DIR + '/?email=' + change_me['email'])  # look up change_me
-    import pdb
-    pdb.set_trace()
     sst.actions.sleep(3)
     edit_button = sst.actions.get_element_by_css('#editaccountshortprofile')
     sst.actions.click_element(edit_button)
@@ -233,6 +242,8 @@ class SubscriberTest(unittest.TestCase):
         addSubscription(BRIEF_IDS['CIA10/8/2007'], **change_this_subscriber)
         addSubscription(BRIEF_IDS['AAAA10/3/2006'], **merge_into_subscriber)
         addSubscription(BRIEF_IDS['AAAA1/21/2009'], **merge_into_subscriber)
+        import pdb
+        pdb.set_trace()
         # Now that we have our subscriptions, do merge routine
         mergeRoutine(change_this_subscriber, merge_into_subscriber)
         # Database checks for giver subscriber
