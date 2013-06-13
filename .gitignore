@@ -3,3 +3,4 @@ dbconfig.py
 *.pyc
 .git
 *.log
+*~
