@@ -28,6 +28,15 @@ inner join current_subscriptions cs on cs.subscriberid = s.subscriberid and cs.b
 where s.subscriberid = $SUBSCRIBER_ID -- PHP variable for the subscriber you're editing
 and b.briefid = $PASSED_IN_BRIEFID  -- passed in
 
+/*
+IMPORTANT
+
+Test to determine $FINAL_PARENT_ID for query 3
+--------------------------------------------------------------------
+if array 2 is null, then pass briefid from query 1 to the next query
+else: pass the result of query 2
+
+*/
 
 -- Unsub One SQL query 3
 -- This query gets children, if subscriptions to children exist
@@ -37,7 +46,7 @@ inner join brief b on lsb.briefid = b.briefid
 inner join subscriber s on lsb.subscriberid = s.subscriberid
 inner join current_subscriptions cs on cs.subscriberid = s.subscriberid and cs.briefid = lsb.briefid
 where s.subscriberid = $SUBSCRIBER_ID -- PHP variable for the subscriber you're editing
-and b.parentid = $PASSED_IN_BRIEFID  -- passed in; this should exclude anything in $unsub_array_1
+and b.parentid = $FINAL_PARENT_ID  -- passed in; this should exclude anything in $unsub_array_1
 
 
 -- insert "U" row to UNSUBSCRIBE for each item necessary

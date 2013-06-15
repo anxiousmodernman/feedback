@@ -1,0 +1,16 @@
+Change email/domain: 1964
+New subscriptions: 558
+Challenge requests: 1533
+Resubscribe: 1740
+-------------------------------
+RECOVERED SUBSCRIPTIONS: 5795
+
+Multi subscriptions: 178
+No longer with: 1127
+Unsubscribe: 1543
+------------------------------
+UNSUBSCRIBES: 2848
+
+
+
+
